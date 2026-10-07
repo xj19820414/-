@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>圆谱工作台 · Fourier Circles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark"><span></span><span></span><span></span></div>
+        <div>
+          <div class="brand-name">圆谱工作台</div>
+          <div class="brand-sub">FOURIER CIRCLES / LAB 01</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <span class="status-dot"></span><span class="mono">LIVE PREVIEW</span>
+        <button class="icon-btn" id="resetBtn" title="重置实验"><span>↺</span></button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="left-panel">
+        <section class="intro">
+          <div class="eyebrow">EPICYCLE SYNTHESIS</div>
+          <h1>让圆形<br><em>画出形状。</em></h1>
+          <p>用一串旋转圆形逼近任意闭合曲线，观察傅里叶级数如何从频率堆叠出轮廓。</p>
+        </section>
+
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="chain">圆形链</button>
+          <button class="tab" data-tab="analyze">图形分析</button>
+        </div>
+
+        <section class="tab-content active" id="chain-panel">
+          <div class="section-heading">
+            <span>01 / 添加圆形</span>
+            <button class="text-btn" id="addCircleBtn">＋ 新圆形</button>
+          </div>
+          <div class="circle-list" id="circleList"></div>
+          <div class="hint-box">
+            <span class="hint-icon">↗</span>
+            <div><strong>嵌套规则</strong><br><span>每个圆形的圆心都落在上一个圆形的圆周上。</span></div>
+          </div>
+        </section>
+
+        <section class="tab-content" id="analyze-panel">
+          <div class="section-heading"><span>02 / 闭合图形</span><span class="mono muted">TRACE MODE</span></div>
+          <div class="draw-box">
+            <canvas id="drawCanvas" width="320" height="220"></canvas>
+            <div class="draw-label" id="drawLabel">在这里描画一笔闭合轮廓</div>
+          </div>
+          <div class="analyze-controls">
+            <label>采样点数 <output id="sampleValue">128</output></label>
+            <input id="sampleRange" type="range" min="32" max="256" step="16" value="128">
+            <label>误差阈值 <output id="errorValue">2.5%</output></label>
+            <input id="errorRange" type="range" min="0.5" max="8" step="0.5" value="2.5">
+          </div>
+          <button class="primary-btn" id="analyzeBtn">计算最少圆形数 <span>→</span></button>
+          <div class="analysis-result" id="analysisResult">
+            <div class="result-number">—</div><div><strong>等待轮廓</strong><br><span>描画一个闭合图形后开始分析。</span></div>
+          </div>
+        </section>
+
+        <footer class="left-footer">
+          <span class="mono">N = <b id="circleCount">3</b> TERMS</span>
+          <span class="mono muted">v1.0.0</span>
+        </footer>
+      </aside>
+
+      <section class="stage">
+        <div class="stage-toolbar">
+          <div class="stage-title"><span class="live-line"></span> 组合轨迹 <span class="mono muted">T = <b id="timeReadout">0.00</b>s</span></div>
+          <div class="stage-tools">
+            <label class="switch-label"><input type="checkbox" id="trailToggle" checked><span class="switch"></span>轨迹</label>
+            <button class="small-btn" id="pauseBtn">暂停</button>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="mainCanvas"></canvas>
+          <div class="canvas-note">DRAG A NODE TO REORIENT</div>
+          <div class="axis-label axis-x">REAL</div><div class="axis-label axis-y">IMAGINARY</div>
+        </div>
+        <div class="stage-footer">
+          <span>组合路径</span><div class="progress"><i id="progressBar"></i></div><span class="mono" id="progressText">00:00</span>
+        </div>
+      </section>
+
+      <aside class="right-panel">
+        <div class="readout-head"><span class="eyebrow">SPECTRUM READOUT</span><span class="mono muted">Z(t)</span></div>
+        <div class="big-readout"><span id="frequencyReadout">03</span><small>ACTIVE VECTORS</small></div>
+        <div class="metric-grid">
+          <div><span>半径总和</span><strong id="sumRadius">178</strong><small>PX</small></div>
+          <div><span>闭合误差</span><strong id="closureError">0.8</strong><small>%</small></div>
+          <div><span>旋转方向</span><strong id="directionReadout">CW</strong><small>默认</small></div>
+          <div><span>刷新率</span><strong>60</strong><small>FPS</small></div>
+        </div>
+        <div class="wave-card">
+          <div class="wave-head"><span>实时波形 / 轨迹</span><span class="mono muted">0—2π</span></div>
+          <canvas id="waveCanvas" width="300" height="120"></canvas>
+        </div>
+        <div class="legend">
+          <div><span class="legend-line coral"></span>组合路径</div>
+          <div><span class="legend-line cyan"></span>圆形边界</div>
+          <div><span class="legend-line white"></span>旋转半径</div>
+        </div>
+        <div class="quote">“任何连续的闭合曲线，都可以被一群旋转的圆形讲述。”<span>— J. B. Fourier, reimagined</span></div>
+      </aside>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
